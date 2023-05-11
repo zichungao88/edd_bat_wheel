@@ -11,11 +11,11 @@
 #define RST 8
 #define LED -1
 
-#define BUTTON1 4 // on/off button
-#define BUTTON2 5 // corner 1
-#define BUTTON3 6 // corner 2
+#define BUTTON1 4  // on/off button
+#define BUTTON2 5  // corner 1
+#define BUTTON3 6  // corner 2
 
-LCDWIKI_SPI mylcd (MODEL,CS,CD, MISO, MOSI, RST, SCK, LED);
+LCDWIKI_SPI mylcd(MODEL,CS,CD, MISO, MOSI, RST, SCK, LED);
 
 #define BLACK 0x0000
 #define BLUE 0x001F
@@ -39,10 +39,10 @@ int angleArr[8] = {15, 30, 45, 60, 75, 90, 105, 120};  // different angle modes
 int selectAngle = 0;  // (0-7)
 
 void setup() {
-    mylcd.Init_LCD ();
-    mylcd.Fill_Screen (BLACK);
+    mylcd.Init_LCD();
+    mylcd.Fill_Screen(BLACK);
 
-    Serial.begin (9600);
+    Serial.begin(9600);
     pinMode(2, INPUT_PULLUP);  // internal pull-up input pin 2
     pinMode(3, INPUT_PULLUP);  // internal pull-up input pin 3
 
@@ -58,33 +58,31 @@ void setup() {
     attachInterrupt(1, ai1, RISING);
 
     // set start screen
-    mylcd.Set_Text_colour (WHITE);
-    mylcd.Set_Text_Back_colour (BLACK);
-    mylcd.Set_Text_Size (2);
-    mylcd.Print_String ("Measurements", 0 , 0);
+    mylcd.Set_Text_colour(WHITE);
+    mylcd.Set_Text_Back_colour(BLACK);
+    mylcd.Set_Text_Size(2);
+    mylcd.Print_String("Measurements", 0, 0);
 
     // set starting angle
-    mylcd.Set_Text_Size (1);
+    mylcd.Set_Text_Size(1);
     String degree = String(angleArr[selectAngle]);
     degree += " degree  ";
-    mylcd.Print_String (degree, LEFT, 120);
-    mylcd.Set_Text_Size (2);
+    mylcd.Print_String(degree, LEFT, 120);
+    mylcd.Set_Text_Size(2);
     printMeasurements(0);
-
     Serial.begin(9600);
 }
 
 void loop() {
     // send counter value
-
     // increment counter when encoder is turned
     if (counter != temp && !locked) {
-        printMeasurements(counter); // update screen
+        printMeasurements(counter);  // update screen
         temp = counter;
     }
 
     // angleArr[8] = {15, 30, 45, 60, 75, 90, 105, 120};
-    if (digitalRead(BUTTON1) == 1) { // green
+    if (digitalRead(BUTTON1) == 1) {  // green
         greenCounter++;
         delay(10);
     }
@@ -95,10 +93,10 @@ void loop() {
             if (selectAngle == 8) {
                 selectAngle = 0;
             }
-            mylcd.Set_Text_Size (1);
+            mylcd.Set_Text_Size(1);
             String degree = String(angleArr[selectAngle]);
             degree += " degree  ";
-            mylcd.Print_String (degree, LEFT, 120);
+            mylcd.Print_String(degree, LEFT, 120);
             mylcd.Set_Text_Size (2);
             delay(30);
         }
@@ -113,22 +111,22 @@ void loop() {
     }
 
     // blue button adds the selected angle distance
-    if (digitalRead(BUTTON2) == 1) { // blue
+    if (digitalRead(BUTTON2) == 1) {  // blue
         counter += 4.655 / (conversionFactor * tan (angleArr[selectAngle] * 0.0174533 / 2));
         temp += 4.655 / (conversionFactor * tan (angleArr[selectAngle] * 0.0174533 / 2));
         printMeasurements(counter);
     }
 
     // red button locks if pressed and resets if held down
-    if (digitalRead(BUTTON3) == 1) { // red
+    if (digitalRead(BUTTON3) == 1) {  // red
         if (!locked) {
             locked = true;
-            mylcd.Set_Text_Size (1);
-            mylcd.Print_String ("locked", RIGHT, 120);
+            mylcd.Set_Text_Size(1);
+            mylcd.Print_String("locked", RIGHT, 120);
             String degree = String(angleArr[selectAngle]);
             degree += " degree  ";
-            mylcd.Print_String (degree, LEFT, 120);
-            mylcd.Set_Text_Size (2);
+            mylcd.Print_String(degree, LEFT, 120);
+            mylcd.Set_Text_Size(2);
             delay(2000);
             if (digitalRead(BUTTON3) == 1) {
                 counter = 0;
@@ -138,12 +136,12 @@ void loop() {
         }
         else if (locked) {
             locked = false;
-            mylcd.Set_Text_Size (1);
+            mylcd.Set_Text_Size(1);
             mylcd.Print_String("            ", RIGHT, 120);
             String degree = String(angleArr[selectAngle]);
             degree += " degree  ";
-            mylcd.Print_String (degree, LEFT, 120);
-            mylcd.Set_Text_Size (2);
+            mylcd.Print_String(degree, LEFT, 120);
+            mylcd.Set_Text_Size(2);
             Serial.print(locked);
             delay(700);
             if (digitalRead(BUTTON3) == 1) {
@@ -159,7 +157,7 @@ void ai0() {
     // ai0 is activated if DigitalPin nr 2 is going from LOW to HIGH
     // checks pin 3 to determine direction
     if (!locked) {
-        if (digitalRead(3)==LOW) {
+        if (digitalRead(3) == LOW) {
             counter--;
         }
         else {
@@ -172,7 +170,7 @@ void ai1() {
     // ai0 is activated if DigitalPin nr 3 is going from LOW to HIGH
     // checks pin 2 to determine direction
     if (!locked) {
-        if (digitalRead(2)==LOW) {
+        if (digitalRead(2) == LOW) {
             counter++;
         }
         else {
@@ -183,7 +181,7 @@ void ai1() {
 
 // inputs counter and updates screen
 void printMeasurements(double counter) {
-    inches = counter * conversionFactor; // converts encoder cycles into inches
+    inches = counter * conversionFactor;  // converts encoder cycles into inches
     feet = inches / 12;
     meters = feet / 3.280839895;
 
@@ -191,7 +189,7 @@ void printMeasurements(double counter) {
     String stringFeet = "    " + String(feet) + " ft    ";
     String stringMeter = "    " + String(meters) + " m    ";
 
-    mylcd.Print_String (stringInches, CENTER, 30);
-    mylcd.Print_String (stringFeet, CENTER, 60);
-    mylcd.Print_String (stringMeter, CENTER, 90);
+    mylcd.Print_String(stringInches, CENTER, 30);
+    mylcd.Print_String(stringFeet, CENTER, 60);
+    mylcd.Print_String(stringMeter, CENTER, 90);
 }
